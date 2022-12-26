@@ -118,6 +118,7 @@ conn.execute('''CREATE TABLE IF NOT EXISTS MAINTENANCE
     Lab VARCHAR(10) NOT NULL,
     Date_import DATE NOT NULL,
     Expected_date_export DATE NOT NULL,
+    Date_export DATE NOT NULL,
     VAT_Supervisor INTEGER NOT NULL,
     PRIMARY KEY (ID_Artwork,VAT_Supervisor),
     FOREIGN KEY(ID_Artwork) REFERENCES ARTWORK(ID) ON DELETE CASCADE ON UPDATE CASCADE,
