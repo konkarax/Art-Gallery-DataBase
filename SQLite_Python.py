@@ -19,7 +19,7 @@ def print_selection():
     print("\nSelect the table you want to search:")
 
 def print_tables():
-    print("\nARTWORK, ARTIST, BORROWS_FROM, BORROWS_TO, CONDUCTS, EMPLOYEE")
+    print("\nARTWORK, ARTIST, BORROWS_FROM, BORROWS_TO, CONDUCTS_MAINTENANCE, EMPLOYEE")
     print("EMPLOYEE_MAINTENANCE, EXHIBITION, EXTERNAL_INSTITUTION")
     print("HALL, MAINTENANCE, TICKET, TICKET_CONTAINS")
 
@@ -73,7 +73,7 @@ def show_attribute(table):
         print('VAT, Specialty')
     elif (table=='MAINTENANCE'):
         print('ID_Artwork,Lab,Date_import,Expected_date_export,Date_export,VAT_Supervisor')
-    elif (table=='CONDUCTS'):
+    elif (table=='CONDUCTS_MAINTENANCE'):
         print('ID_Artwork,VAT')
 
         
@@ -325,9 +325,99 @@ while(select!='exit'):
                 print("Invalid date")
             break
     elif(select=='5'):
-        print(5)
+        print("What is the name of the external institution (eg Συλλογή Γεωργίου Τραπάντζαλη)")
+        name=input()
+        cursor.execute("SELECT ID FROM EXTERNAL_INSTITUTION")
+        for row in cursor:
+            continue
+        ID=row[0]+1
+        now=datetime.datetime.now()
+        date_time=now.strftime("%Y-%m-%d %H:%M:%S")
+        
+        print("Select the date you want to borrow (eg 2023-01-05)")
+        date_b=input()
+        if date_b=='now':
+            date_b=now.strftime("%Y-%m-%d")
+        flag=check_date(date_b)
+        
+        print("Select the date you want to return (eg 2023-03-05)")
+        date_r=input()
+        if date_r=='now':
+            date_r=now.strftime("%Y-%m-%d")
+        flag2=check_date(date_r)
+        
+        print("Insert the contract price")
+        money=input()
+
+        while(flag and (flag2 or date_r=='')):
+            print("Select the artwork (eg 50041)")
+            art=input()
+            art_split=art.split(",")
+            av=True
+            for artwork in art_split:
+                if check_available(date_b,art)==False:
+                    print("The art is not available")
+                    av=False
+                    break
+            if av:
+                break
+
+        if date_r=='':
+            conn.execute("INSERT INTO EXTERNAL_INSTITUTION VALUES("+str(ID)+",'"+name+"','"+date_time+"','"+date_b+"',NULL,"+money+");")
+        else:
+            conn.execute("INSERT INTO EXTERNAL_INSTITUTION VALUES("+str(ID)+",'"+name+"','"+date_time+"','"+date_b+"','"+date_r+"',"+money+");")
+        for artwork in art_split:
+            conn.execute("INSERT INTO BORROWS_TO VALUES("+str(ID)+","+artwork+");")
+        conn.commit()
+        print("Artwork has been sent to external institution")
+    
     elif(select=='6'):
-        print(6)
+        print("Write the artwork details")
+        print("eg 12034,Η Αποθέωση της Βαυαρίας,Λάδι σε μουσαμά,73x125,Πίνακας,1896,NULL,Συμβολισμός,120,2,1203\n")
+        show_attribute('ARTWORK')
+        art=input()
+        print("What is the name of the external institution (eg Συλλογή Γεωργίου Τραπάντζαλη)")
+        name=input()
+        cursor.execute("SELECT ID FROM EXTERNAL_INSTITUTION")
+        for row in cursor:
+            continue
+        ID=row[0]+1
+        now=datetime.datetime.now()
+        date_time=now.strftime("%Y-%m-%d %H:%M:%S")
+        
+        print("Select the date you want to borrow (eg 2023-01-05)")
+        date_b=input()
+        if date_b=='now':
+            date_b=now.strftime("%Y-%m-%d")
+        flag=check_date(date_b)
+        
+        print("Select the date you want to return (eg 2023-03-05)")
+        date_r=input()
+        if date_r=='now':
+            date_r=now.strftime("%Y-%m-%d")
+        flag2=check_date(date_r)
+        
+        print("Insert the contract price")
+        money=input()
+        while(flag and (flag2 or date_r=='')):
+            art_split=art.split(",")
+            ID_art=art_split[0]
+            if date_r=='':
+                conn.execute("INSERT INTO EXTERNAL_INSTITUTION VALUES("+str(ID)+",'"+name+"','"+date_time+"','"+date_b+"',NULL,"+money+");")
+            else:
+                conn.execute("INSERT INTO EXTERNAL_INSTITUTION VALUES("+str(ID)+",'"+name+"','"+date_time+"','"+date_b+"','"+date_r+"',"+money+");")
+            if (art_split[6]=='NULL'):
+                conn.execute("INSERT INTO ARTWORK VALUES("+art_split[0]+",'"+art_split[1]+"','"+art_split[2]+"','"+art_split[3]+"',\
+                                                        '"+art_split[4]+"',"+art_split[5]+",NULL,\
+                                                        '"+art_split[7]+"',"+art_split[8]+","+art_split[9]+","+art_split[10]+");")
+            else:    
+                conn.execute("INSERT INTO ARTWORK VALUES("+art_split[0]+",'"+art_split[1]+"','"+art_split[2]+"','"+art_split[3]+"',\
+                                                        '"+art_split[4]+"',"+art_split[5]+",'"+art_split[6]+"',\
+                                                        '"+art_split[7]+"',"+art_split[8]+","+art_split[9]+","+art_split[10]+");")
+            conn.execute("INSERT INTO BORROWS_FROM VALUES("+str(ID)+","+ID_art+");")
+            conn.commit()
+            print("Request has been added to the database")
+            break
     elif(select=='7'):
         print("Select the artwork you want to send to maintenance: (eg 12031)")
         art=input()
