@@ -197,10 +197,11 @@ while(select!='exit'):
             date=input()
             flag=check_date(date)
             if (flag==True or date=='now'):
-                cursor.execute("SELECT A.ID,A.Title,M.Date_import,M.Expected_date_export,M.Date_export\
+                cursor.execute("SELECT A.ID,A.Title,M.Date_import,M.Expected_date_export,M.Date_export,M.Lab\
                                 FROM ARTWORK AS A, MAINTENANCE AS M\
                                 WHERE M.ID_Artwork=A.ID AND date('"+date+"')>M.Date_import AND \
                                      (M.Date_export IS NULL OR M.Date_export>date('"+date+"'))")
+                print("\n(ID_Artwork,Title,Date_import,Expecte_date_export,Date_export,Lab)\n")
                 for row in cursor:
                     print(row)
             else:
@@ -216,7 +217,8 @@ while(select!='exit'):
             if (flag==True or date=='now'):
                 cursor.execute("SELECT ID,Title\
                                FROM EXHIBITION\
-                               WHERE date('"+date+"')>Date_Import AND(Periodical=0 OR (Periodical=1 AND date('"+date+"')<Date_Export)")
+                               WHERE date('"+date+"')>Date_Import AND(Periodical=0 OR (Periodical=1 AND date('"+date+"')<Date_Export))")
+                print("\n(ID,Title)\n")
                 for row in cursor:
                     print(row)
             else:
@@ -230,9 +232,10 @@ while(select!='exit'):
             date=input()
             flag=check_date(date)
             if (flag==True or date=='now'):
-                cursor.execute("SELECT A.ID,A.Title,EX.Date_borrowing,EX.Date_return\
+                cursor.execute("SELECT A.ID,A.Title,EX.Name,EX.Date_borrowing,EX.Date_return\
                                 FROM EXTERNAL_INSTITUTION as EX, ARTWORK as A,BORROWS_TO as B\
                                 WHERE EX.ID=B.ID_Borrowing AND B.ID_Artwork=A.ID AND date('"+date+"')<EX.Date_return")
+                print("\n(ID_Artwork,Title,Name_Institution,Date_borrowing,Date_return)\n")
                 for row in cursor:
                     print(row)
                 break
@@ -253,10 +256,11 @@ while(select!='exit'):
             flag2=check_time(time) #Έλεγχος format χρόνου
             if (flag==True or date=='now') and flag2==True :
                 #Άθροισμα όλων των εισητηρίων ανά αίθουσα για συγκεκριμένη στιγμή
-                cursor.execute("SELECT SUM(T.Multiplicity),H.ID_Exhibition,H.ID,H.Capacity\
+                cursor.execute("SELECT SUM(T.Multiplicity),H.Capacity,H.ID,H.ID_Exhibition\
                                 FROM TICKET as T, TICKET_CONTAINS as TC, HALL as H\
                                 WHERE T.Date_issuing='"+date+" "+time+"' AND T.ID=TC.ID_Ticket AND TC.ID_Exhibition=H.ID_Exhibition\
                                 GROUP BY H.ID")
+                print("\n(Sum_of_tickets,Capacity,Hall,Exhibition)\n")
                 for row in cursor:
                     print(row)
 
@@ -313,7 +317,6 @@ while(select!='exit'):
                     conn.execute("INSERT INTO TICKET VALUES("+str(ID)+",'"+date+" "+time+"',\
                                     '"+date+" 20:00:00',"+str(value)+",'"+name+"',"+str(num)+","+str(discount)+",'"+now_time+"');")
                     for ex in ex_split:
-                        print(ex)
                         conn.execute("INSERT INTO TICKET_CONTAINS VALUES("+str(ID)+","+ex+");")
                     conn.commit()
                     print("Ticket has been inserted succesfully to the database")
@@ -440,7 +443,7 @@ while(select!='exit'):
             for row in cursor:
                 temp=row
             if temp==0:
-                print("Select Supervisor: 411297822, 021132021, 099807807,151629092,131206401")
+                print("Select Supervisor: 411297822, 021132021, 099807807, 151629092, 131206401")
                 supervisor=input()
                 print("Select the employee that is going to conduct the maintenance")
                 employee=input()
@@ -459,6 +462,3 @@ while(select!='exit'):
             
 print("Exiting data base...")
 conn.close()
-
-
-
